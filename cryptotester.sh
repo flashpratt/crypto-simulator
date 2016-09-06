@@ -73,7 +73,7 @@ function usage {
 
 # TO DO: write main function here
 function main {
-	while getops "feEdDpsl:t:T:" OPTION
+	while getopts "feEdDpsl:t:T:" OPTION
 	do
 		case $OPTION in 
 			h)
